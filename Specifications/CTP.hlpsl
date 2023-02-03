@@ -1,7 +1,5 @@
-%% CTP: B2 - intermediar (B1,B2,B4,PG)
+%% CTP: B2 - intermediary 
 
-
-%%%% broker1 (B1,B2,PG,Cn1,Otp1,Pid1,Pid2,N01,Am1,Am2,PkB1,PkB2,PkPG,H,Snd,Rcv)
 role broker1 (B1, B2, PG: agent,             
             Cn1, Otp1, Pid1, Pid2, N01: text,	
             Am1, Am2: nat,	
@@ -18,7 +16,7 @@ played_by B1 def=
 
   transition
 
-% B1 trimite PO12 la B2 intermediar
+% B1 sends PO12 to B2 broker
  1.  State = 0 /\ Rcv(start)
           =|> 
           State' :=1
@@ -29,41 +27,40 @@ played_by B1 def=
           /\ witness(B1,PG,pg_b1_pi1,B1.Cn1.Otp1.N01.N12'.Am1.or.Am2.B2)
           /\ witness(B1,B2,b2_b1_oi1,B1.B2.Pid1.or.Pid2.N01.N12'.Am1.or.Am2)
 
-% B1 receptioneaza PE12=y, si E24barat=y de la B2 
+% B1 receives PE12=y, and E24overline=y from B2 
  2.  State = 1 
           /\ Rcv({y.B1.B2.N01.N12.Pid1.{H(y.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).y.N01.N12.Pid1.{H(y.N01.N12.Pid1)}_inv(PkPG).y.N01.N12.N24'.Pid1.{H(y.N01.N12.N24'.Pid1)}_inv(PkPG)}_Kb1b2)
           =|> 
           State' :=2         
           /\ request(B1,PG,b1_pg_pe12,y.B1.B2.N01.N12.Pid1.H(y.B1.B2.N01.N12.Pid1.Am1).H(y.N01.N12.Pid1))
 
-%--R1.1: B1 receptioneaza PE12=a, de la B2
+%--R1.1: B1 receives PE12=a, from B2
  2.  State = 1 
           /\ Rcv({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).a.N01.N12.Pid1.{H(a.N01.N12.Pid1)}_inv(PkPG)}_Kb1b2)
           =|> 
           State' :=3        
           /\ request(B1,PG,b1_pg_pe12a,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1).H(a.N01.N12.Pid1))
 
-%--R1.2: B1 receptioneaza PE12=a, de la PG
+%--R1.2: B1 receives PE12=a, from PG
  3.  State = 1 
           /\ Rcv({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).a.N01.N12.Pid1.{H(a.N01.N12.Pid1)}_inv(PkPG)}_Kb1pg'.{Kb1pg'}_PkB1)
           =|> 
           State' :=4       
           /\ request(B1,PG,b1_pg_pe12a,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1).H(a.N01.N12.Pid1))
 
-%--Res1: B1 receptioneaza APE12, de la PG
+%--Res1: B1 receives APE12, from PG
  4.  State = 2 /\ Rcv({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1.y.B1.B2.N01.N12.Pid1.{H(y.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.Pid1.{H(y.N01.N12.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb1pg'.{Kb1pg'}_PkPG)
           =|> 
           State' :=5 
 	  /\ request(B1,PG,b1_pg_ape12,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1.y.B1.B2.N01.N12.Pid1.H(y.B1.B2.N01.N12.Pid1.Am1).H(y.N01.N12.Pid1)).H(a.N01.N12.Pid1.H(y.N01.N12.Pid1))) 
 
-%-- R2.1: B1 receptioneaza PE12=a de la PG ptr pid1 or pid2
+%-- R2.1: B1 receives PE12=a from PG for pid1 or pid2
  5.  State  = 1 /\ Rcv({a.B1.B2.N01.N12.Pid1.or.Pid2.{H(a.B1.B2.N01.N12.Pid1.or.Pid2.Am1.or.Am2)}_inv(PkPG).a.N01.N12.Pid1.or.Pid2.{H(a.N01.N12.Pid1.or.Pid2)}_inv(PkPG)}_Kb1pg'.{Kb1pg'}_PkPG)
           =|> 
           State':= 6
           /\ request(B1,PG,b1_pg_pe12a_pid1_pid2,a.B1.B2.N01.N12.Pid1.or.Pid2.H(a.B1.B2.N01.N12.Pid1.or.Pid2.Am1.or.Am2).H(a.N01.N12.Pid1.or.Pid2))
 end role
 
-%%%%% broker2 (B1,B2,B4,PG,Cn2,Otp2,PkB1,PkB2,PkB4,PkPG,OIList1,H,Snd,Rcv)
 role broker2 (B1, B2, B4, PG: agent,
             Cn2,Otp2:text,  	            
             PkB1, PkB2, PkB4, PkPG: public_key, 
@@ -82,10 +79,10 @@ played_by B2 def=
 
   transition
 
-% B2 rec PO12 de la B1 si trim PO24 la B4
+% B2 receives PO12 from B1 and sends PO24 to B4
  1.  State = 0 /\ Rcv({Y'.B1.B2.Pid1'.or.Pid2'.N01'.N12'.Am1'.or.Am2'.{H(B1.B2.Pid1'.or.Pid2'.N01'.N12'.Am1'.or.Am2')}_inv(PkB1)}_Kb1b2'.{Kb1b2'}_PkB2) 
 	  /\ not(in(B1.B2.Pid1'.or.Pid2'.N01'.N12'.Am1'.or.Am2'.{H(B1.B2.Pid1'.or.Pid2'.N01'.N12'.Am1'.or.Am2')}_inv(PkB1), OIList1)) 
-         % testul se face numai pe prod individual, nu pe produs   /\ in(Pid1'.or.Pid2'.Am1'.or.Am2' , PList) % B2 este provider
+         
           =|> 
           State' :=1 
 	  /\ OIList1' :=cons(B1.B2.Pid1'.or.Pid2'.N01'.N12'.Am1'.or.Am2'.{H(B1.B2.Pid1'.or.Pid2'.N01'.N12'.Am1'.or.Am2')}_inv(PkB1) , OIList1)	
@@ -97,14 +94,14 @@ played_by B2 def=
           /\ witness(B2,PG,pg_b2_pi2,B2.Cn2.Otp2.N01'.N12'.N24'.Am1'.or.Am2'.B4)
           /\ witness(B2,B4,b4_b2_oi2,B2.B4.Pid1'.or.Pid2'.N01'.N12'.N24'.Am1'.or.Am2')
 
-% B2 receptioneaza PE24=y si E46barat=y de la B4,atunci trim PR12 la PG    
+% B2 receives PE24=y and E46overline=y from B4,then  sends PR12 to PG    
  2.  State = 1 /\ Rcv({y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).y.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG).y.N01.N12.N24.N45'.Pid1.{H(y.N01.N12.N24.N45'.Pid1)}_inv(PkPG)}_Kb2b4) 
          =|> 
          State':= 2
          /\ Kb2pg' :=new()
          /\ Snd({Y.Pid1.{H(Pid1.N01.N12.B1.B2.Am1)}_inv(PkB2)}_Kb2pg'.{Kb2pg'}_PkPG)
-        
-% B2 rec de la PG PE12=y, pe care o trm  impreuna cu E24barat=E24=y la B1              
+         /\ witness(B2,PG,pg_b2_pr12,Pid1.N01.N12.B1.B2.Am1)
+% B2 receives from PG PE12=y, that sends  together with E24overline=E24=y to B1              
  3.  State = 2 /\ Rcv({y.B1.B2.N01.N12.Pid1.{H(y.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).y.N01.N12.Pid1.{H(y.N01.N12.Pid1)}_inv(PkPG)}_Kb2pg)
           =|> 
           State':= 3
@@ -112,73 +109,74 @@ played_by B2 def=
           /\ request(B2,PG,b2_pg_pe12,y.B1.B2.N01.N12.Pid1.H(y.B1.B2.N01.N12.Pid1.Am1).H(y.N01.N12.Pid1))
  	  /\ request(B2,PG,b2_pg_pe24,y.B2.B4.N01.N12.N24.Pid1.H(y.B2.B4.N01.N12.N24.Pid1.Am1).H(y.N01.N12.N24.Pid1))
 
-%--R1.1: B2 rec de la PG PE12=a, pe care o trim la B1 si trimite PE12=a,PE24=y la PG ptr a aborta s24             
+%--R1.1: B2 receives from PG PE12=a, that sends to B1 and sends PE12=a,PE24=y to PG to abort s24             
  4.  State = 2 /\ Rcv({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).a.N01.N12.Pid1.{H(a.N01.N12.Pid1)}_inv(PkPG)}_Kb2pg)
           =|> 
           State':= 4
           /\ Snd({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).a.N01.N12.Pid1.{H(a.N01.N12.Pid1)}_inv(PkPG)}_Kb1b2)
 	  /\ Snd({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).a.N01.N12.Pid1.{H(a.N01.N12.Pid1)}_inv(PkPG).y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).y.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG)}_Kb2pg)
          
-%--R1.1: B2 receptioneaza raspunsul de la PG cu APE24=a in s24 care era y anterior
+%--R1.1: B2 receives the answer from PG cu APE24=a in s24 that was previously  y 
  5.  State = 4 /\ Rcv({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb2pg)
          =|> 
          State':= 5  
          /\ request(B2,PG,b2_pg_ape24,a.B2.B4.N01.N12.N24.Pid1.H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.H(y.B2.B4.N01.N12.N24.Pid1.Am1).H(y.N01.N12.N24.Pid1)).H(a.N01.N12.N24.Pid1.H(y.N01.N12.N24.Pid1)))       
          /\ request(B2,PG,b2_pg_pe12a,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1).H(a.N01.N12.Pid1))  
-          %B accepta ape24=a (dupa ce pe24=y),  si pe12=a in mom receptei ape24
+         
 
-%--R1.2  B2 rec PE24=a de la B4 (s24=a)si trimite la PG PE24=a,PM1,OI1 ptr a obtine s12=a
+%--R1.2  B2 receives PE24=a from B4 (s24=a)and sends to PG PE24=a,PM1,OI1 to obtain s12=a
  6.  State = 1 /\ Rcv({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).a.N01.N12.N24.Pid1.{H(a.N01.N12.N24.Pid1)}_inv(PkPG)}_Kb2b4)
          =|> 
          State':= 6 
 	  /\ Kb2pg' :=new()
 	  /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).a.N01.N12.N24.Pid1.{H(a.N01.N12.N24.Pid1)}_inv(PkPG).Y.B1.B2.Pid1.or.Pid2.N01.N12.Am1.or.Am2.{H(B1.B2.Pid1.or.Pid2.N01.N12.Am1.or.Am2)}_inv(PkB1)}_Kb2pg'.{Kb2pg'}_PkPG)
+  	  /\ witness(B2,PG,pg_b2_ar12,Pid1.N01.N12.B1.B2.Am1)
 
-%--R1.2: B2 rec de la PG PE12=a 
+%--R1.2: B2 receives from PG PE12=a 
  7.  State = 6 /\ Rcv({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).a.N01.N12.Pid1.{H(a.N01.N12.Pid1)}_inv(PkPG)}_Kb2pg)
           =|> 
           State':= 7
           /\ request(B2,PG,b2_pg_pe24a,a.B2.B4.N01.N12.N24.Pid1.H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.H(y.B2.B4.N01.N12.N24.Pid1.Am1).H(y.N01.N12.N24.Pid1)).H(a.N01.N12.N24.Pid1.H(y.N01.N12.N24.Pid1)))       
           /\ request(B2,PG,b2_pg_pe12a,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1).H(a.N01.N12.Pid1))  
-          %B accepta pe24=a si pe12=a in mom receptei pe12=a
+         
 
-%--Res1 din spate din ATP de la B1: B2 rec APE12 de la PG in R1 dupa ce  PE24=y, PE12=y (B2 in state=3) si trm APE12 si PE24 =y la PG ptr a aborta PE24
+%--Res1 backwards from ATP from B1: B2 receives APE12 from PG in R1 after PE24=y, PE12=y (B2 in state=3) and sends APE12 and PE24 =y to PG to abort PE24
  8.  State = 3 /\ Rcv({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1.y.B1.B2.N01.N12.Pid1.{H(y.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.Pid1.{H(y.N01.N12.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb2pg)
         =|> 
         State' :=8 
        	/\ Snd({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1.y.B1.B2.N01.N12.Pid1.{H(y.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.Pid1.{H(y.N01.N12.Pid1)}_inv(PkPG))}_inv(PkPG).y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).y.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG)}_Kb2pg)
 
-%--Res1 din spate din ATP de la B1: B2 rec APE24 de la PG in R1 dupa ce  PE24=y, PE12=y 
+%--Res1 backwards from ATP from B1: B2 receives APE24 from PG in R1 after PE24=y, PE12=y 
  9.  State = 8 /\ Rcv({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb2pg) 
         =|> 
           State' :=9 
        	  /\ request(B2,PG,b2_pg_ape24,a.B2.B4.N01.N12.N24.Pid1.H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.H(y.B2.B4.N01.N12.N24.Pid1.Am1).H(y.N01.N12.N24.Pid1)).H(a.N01.N12.N24.Pid1.H(y.N01.N12.N24.Pid1)))   
           /\ request(B2,PG,b2_pg_ape12,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1.y.B1.B2.N01.N12.Pid1.H(y.B1.B2.N01.N12.Pid1.Am1).H(y.N01.N12.Pid1)).H(a.N01.N12.Pid1.H(y.N01.N12.Pid1)))  
- 	 %B2 accepta ape24=a. ape12=a in mom receptei ape24
+ 	
 
-%--R2.1: B2 (in starea 1 dupa trim po24) receptioneaza t de la intrus ptr a simula ca PE24=a trimis de B4 nu mai ajunge la B2(cadere retea, intervine intrusul,etc., comp neonest al lui B4 care a rec PE24=a si nu mai trimite la B2) si trimite la PG PM2.OI2 la PG ptr a recept PE24 aborted 
- 10.  State = 1 /\ Rcv(t)
+%--R2.1: B2  receives timeout from intruder to simulate that PE24=a sent by B4 doen't get to B2 and sends to PG PM2.OI2 to PG to receive PE24 aborted 
+ 10.  State = 1 /\ Rcv(timeout)
          =|> 
         State':= 10
 	 /\ Kb2pg' :=new()
          /\ Snd({{B2.Cn2.Otp2.N01.N12.N24.Am1.or.Am2.B4.{H(B2.Cn2.Otp2.N01.N12.N24.Am1.or.Am2.B4)}_inv(PkB2)}_PkPG.B2.B4.Pid1.or.Pid2.N01.N12.N24.Am1.or.Am2.{H(B2.B4.Pid1.or.Pid2.N01.N12.N24.Am1.or.Am2)}_inv(PkB2)}_Kb2pg'.{Kb2pg'}_PkPG)
 
-%--R2.1: B2 receptioneaza PE24=a de la PG in R2 si trimite la PG PE24=a,PM1,OI1 ptr a obtine s12=a
+%--R2.1: B2 receives PE24=a from PG in R2 and sends to PG PE24=a,PM1,OI1 to obtain s12=a
  11.  State = 10 /\ Rcv({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).a.N01.N12.N24.Pid1.{H(a.N01.N12.N24.Pid1)}_inv(PkPG)}_Kb2pg)
          =|> 
         State':= 11
 	  /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).a.N01.N12.N24.Pid1.{H(a.N01.N12.N24.Pid1)}_inv(PkPG).Y.B1.B2.Pid1.or.Pid2.N01.N12.Am1.or.Am2.{H(B1.B2.Pid1.or.Pid2.N01.N12.Am1.or.Am2)}_inv(PkB1)}_Kb2pg) 
+ 	  /\ witness(B2,PG,pg_b2_ar12,Pid1.N01.N12.B1.B2.Am1)
 
-%--R2.1  B2 rec PE12=a de la PG ptr pid1 or pid2 
+%--R2.1  B2 receives PE12=a from PG to pid1 or pid2 
  12.  State = 11 /\ Rcv({a.B1.B2.N01.N12.Pid1.or.Pid2.{H(a.B1.B2.N01.N12.Pid1.or.Pid2.Am1.or.Am2)}_inv(PkPG).a.N01.N12.Pid1.or.Pid2.{H(a.N01.N12.Pid1.or.Pid2)}_inv(PkPG)}_Kb2pg)
          =|> 
          State':= 12
  	  /\ request(B2,PG,b2_pg_pe24a,a.B2.B4.N01.N12.N24.Pid1.H(a.B2.B4.N01.N12.N24.Pid1.Am1).H(a.B2.B4.N01.N12.Pid1))
           /\ request(B2,PG,b2_pg_pe12a_pid1_pid2,a.B1.B2.N01.N12.Pid1.or.Pid2.H(a.B1.B2.N01.N12.Pid1.or.Pid2.Am1.or.Am2).H(a.N01.N12.Pid1.or.Pid2))
-          %B2 accepta pe24=a. pe12=a in mom receptei pe12=a
+         
 end role
 
-%%%%% broker4 (B2,B4,PG,PkB2,PkB4,PkPG,OIList2,H,Snd,Rcv)
 role broker4 (B2, B4, PG: agent,	            
             PkB2, PkB4, PkPG: public_key, 
  	    OIList2: (agent.agent.text.text.text.text.text.text.nat.text.nat.{hash(agent.agent.text.text.text.text.text.text.nat.text.nat)}_inv(public_key)) set,
@@ -196,7 +194,7 @@ played_by B4 def=
 
   transition
 
-% B4 rec PO24 de la B2 si trim PR24 la PG ce include Pid1 ptr ca pp ca Pid1 e cump cu succes in ot46
+% B4 receives PO24 from B2 and sends PR24 to PG that includes Pid1 
  1.  State = 0 /\ Rcv({Z'.B2.B4.Pid1'.or.Pid2'.N01'.N12'.N24'.Am1'.or.Am2'.{H(B2.B4.Pid1'.or.Pid2'.N01'.N12'.N24'.Am1'.or.Am2')}_inv(PkB2)}_Kb2b4'.{Kb2b4'}_PkB4) 
 	  /\ not(in(B2.B4.Pid1'.or.Pid2'.N01'.N12'.N24'.Am1'.or.Am2'.{H(B2.B4.Pid1'.or.Pid2'.N01'.N12'.N24'.Am1'.or.Am2')}_inv(PkB2), OIList2)) 
           =|> 
@@ -207,36 +205,33 @@ played_by B4 def=
 	  /\ Snd({Z'.Pid1'.N45'.{H(Pid1'.N01'.N12'.N24'.N45'.B2.B4.Am1')}_inv(PkB4)}_Kb4pg'.{Kb4pg'}_PkPG)
           /\ request(B4,B2,b4_b2_oi2,B2.B4.Pid1'.or.Pid2'.N01'.N12'.N24'.Am1'.or.Am2')
 
-% B4 rec de la PG PE24=y, E46barat=y pe care le trim la B2              
+% B4 receives from PG PE24=y, E46overline=y that sends to B2              
  2.  State = 1 /\ Rcv({y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).y.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG).y.N01.N12.N24.N45.Pid1.{H(y.N01.N12.N24.N45.Pid1)}_inv(PkPG)}_Kb4pg)
           =|> 
           State':= 2
           /\ Snd({y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).y.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG).y.N01.N12.N24.N45.Pid1.{H(y.N01.N12.N24.N45.Pid1)}_inv(PkPG)}_Kb2b4)
     
-%--R1.1: B4 rec de la PG APE24=a, dupa ce PE24 a fost =y
+%--R1.1: B4 receives from PG APE24=a, after PE24 was =y
  3.  State = 2 /\ Rcv({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb4pg)
          =|> 
         State':= 3
 
-%--R1.2: B4 rec de la PG PE24=a, si o trim la B2              
+%--R1.2: B4 receives from PG PE24=a, and sends to B2              
  4.  State = 1 /\ Rcv({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).a.N01.N12.N24.Pid1.{H(a.N01.N12.N24.Pid1)}_inv(PkPG)}_Kb4pg)
           =|> 
           State':= 4
           /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).a.N01.N12.N24.Pid1.{H(a.N01.N12.N24.Pid1)}_inv(PkPG)}_Kb2b4)
 
-%--Res1: B4 rec de la PG APE24=a, dupa ce PE24 a fost =y
+%--Res1: B4 receives from PG APE24=a, after PE24 was =y
  5.  State = 2 /\ Rcv({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb4pg) 
          =|> 
         State':= 5
 end role
 
-%%%%%%payment gateway
 role paymentgateway (B1, B2, B4, PG: agent,             
             PkB1, PkB2, PkB4, PkPG: public_key,  
             CIList: (agent.text.text) set,
-%{B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2.{H(B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2)}_inv(PkB1)}_PkPG.Pid1.{H(Pid1.N01.N12.B1.B2.Am1)}_inv(PkB2)
-           PRList2: ({agent.text.text.text.text.nat.text.nat.agent.{hash(agent.text.text.text.text.nat.text.nat.agent)}_inv(public_key)}_(public_key).text.{hash(text.text.text.agent.agent.nat)}_inv(public_key)) set,
-%B2.Cn2.Otp2.N01'.N12'.N24'.Am1'.or.Am2'.B4.{H(B2.Cn2.Otp2.N01'.N12'.N24'.Am1'.or.Am2'.B4)}_inv(PkB2)}_PkPG.Pid1'.N45'.{H(Pid1'.N01'.N12'.N24'.N45'.B2.B4.Am1')}_inv(PkB4)
+            PRList2: ({agent.text.text.text.text.nat.text.nat.agent.{hash(agent.text.text.text.text.nat.text.nat.agent)}_inv(public_key)}_(public_key).text.{hash(text.text.text.agent.agent.nat)}_inv(public_key)) set,
 	    PRList4: ({agent.text.text.text.text.text.nat.text.nat.agent.{hash(agent.text.text.text.text.text.nat.text.nat.agent)}_inv(public_key)}_(public_key).text.text.{hash(text.text.text.text.text.agent.agent.nat)}_inv(public_key)) set,
             H: hash_func,	
             Snd, Rcv: channel(dy))
@@ -252,7 +247,7 @@ played_by PG def=
 
   transition
 
-% PG recept PR24 de la B4 si trimite PE24=y si E46barat=y (ptr a simula ca B4 a receptionat E46=y ptr Pid1) la B4
+% PG receives PR24 from B4 and sends PE24=y and E46overline=y  to B4
  1.  State = 0 
           /\ Rcv({{B2.Cn2'.Otp2'.N01'.N12'.N24'.Am1'.or.Am2'.B4.{H(B2.Cn2'.Otp2'.N01'.N12'.N24'.Am1'.or.Am2'.B4)}_inv(PkB2)}_PkPG.Pid1'.N45'.{H(Pid1'.N01'.N12'.N24'.N45'.B2.B4.Am1')}_inv(PkB4)}_Kb4pg'.{Kb4pg'}_PkPG) 
           /\ not(in({B2.Cn2'.Otp2'.N01'.N12'.N24'.Am1'.or.Am2'.B4.{H(B2.Cn2'.Otp2'.N01'.N12'.N24'.Am1'.or.Am2'.B4)}_inv(PkB2)}_PkPG.Pid1'.N45'.{H(Pid1'.N01'.N12'.N24'.N45'.B2.B4.Am1')}_inv(PkB4), PRList4))  
@@ -264,11 +259,10 @@ played_by PG def=
           /\ request(PG,B2,pg_b2_pi2,B2.Cn2'.Otp2'.N01'.N12'.N24'.Am1'.or.Am2'.B4)
  	  /\ witness(PG,B2,b2_pg_pe24,y.B2.B4.N01'.N12'.N24'.Pid1'.H(y.B2.B4.N01'.N12'.N24'.Pid1'.Am1').H(y.N01'.N12'.N24'.Pid1'))
 
-% PG recept PR12 de la B2 si trimite PE12=y la B2
+% PG receives PR12 from B2 and sends PE12=y to B2
  2.  State = 1 
           /\ Rcv({{B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2.{H(B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2)}_inv(PkB1)}_PkPG.Pid1.{H(Pid1.N01.N12.B1.B2.Am1)}_inv(PkB2)}_Kb2pg'.{Kb2pg'}_PkPG) 
           /\ not(in({B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2.{H(B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2)}_inv(PkB1)}_PkPG.Pid1.{H(Pid1.N01.N12.B1.B2.Am1)}_inv(PkB2), PRList2))  
-%PRList2: ({agent.text.text.text.text.nat.text.nat.agent.{hash(agent.text.text.text.text.nat.text.nat.agent)}_inv(public_key)}_(public_key).text.{hash(text.text.text.agent.agent.nat)}_inv(public_key)) set,
           /\ in(B1.Cn1'.Otp1' , CIList)  
         =|> 
           State' :=2 
@@ -278,8 +272,9 @@ played_by PG def=
           /\ request(PG,B1,pg_b1_pi1,B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2)
           /\ witness(PG,B2,b2_pg_pe12,y.B1.B2.N01.N12.Pid1.H(y.B1.B2.N01.N12.Pid1.Am1).H(y.N01.N12.Pid1))
  	  /\ witness(PG,B1,b1_pg_pe12,y.B1.B2.N01.N12.Pid1.H(y.B1.B2.N01.N12.Pid1.Am1).H(y.N01.N12.Pid1))
+          /\ request(PG,B2,pg_b2_pr12,Pid1.N01.N12.B1.B2.Am1)
 
-%--R1.1: PG dupa ce PE24=y, recept PR12 de la B2 si trimite PE12=a la B2
+%--R1.1: PG after PE24=y, receives PR12 from B2 and sends PE12=a to B2
  3.  State = 1 
  	   /\ Rcv({{B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2.{H(B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2)}_inv(PkB1)}_PkPG.Pid1.{H(Pid1.N01.N12.B1.B2.Am1)}_inv(PkB2)}_Kb2pg'.{Kb2pg'}_PkPG) 
           /\ not(in({B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2.{H(B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2)}_inv(PkB1)}_PkPG.Pid1.{H(Pid1.N01.N12.B1.B2.Am1)}_inv(PkB2), PRList2))  
@@ -291,16 +286,16 @@ played_by PG def=
           /\ witness(PG,B2,b2_pg_pe12a,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1).H(a.N01.N12.Pid1))
  	  /\ witness(PG,B1,b1_pg_pe12a,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1).H(a.N01.N12.Pid1))
         
-%--R1.1: PG receptioneaza de la B2 PE12=a, PE24=y si trimite APE24 la B4,B2;  
+%--R1.1: PG receives from B2 PE12=a, PE24=y and sends APE24 to B4,B2;  
  4.  State = 3 
 	  /\ Rcv({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).a.N01.N12.Pid1.{H(a.N01.N12.Pid1)}_inv(PkPG).y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).y.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG)}_Kb2pg)
          =|> 
          State':= 4  
-       /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb4pg)    %trimite APE24 la B4
-       /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb2pg) %trimite APE45 la B2
+       /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb4pg)    %sends APE24 to B4
+       /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb2pg) %sends APE45 to B2
        /\ witness(PG,B2,b2_pg_ape24,a.B2.B4.N01.N12.N24.Pid1.H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.H(y.B2.B4.N01.N12.N24.Pid1.Am1).H(y.N01.N12.N24.Pid1)).H(a.N01.N12.N24.Pid1.H(y.N01.N12.N24.Pid1))) 
 
-%--R1.2: PG recept PR24 de la B4 si trimite PE24=a la B4
+%--R1.2: PG receives PR24 from B4 and sends PE24=a to B4
  5.  State = 0 
           /\ Rcv({{B2.Cn2'.Otp2'.N01'.N12'.N24'.Am1'.or.Am2'.B4.{H(B2.Cn2'.Otp2'.N01'.N12'.N24'.Am1'.or.Am2'.B4)}_inv(PkB2)}_PkPG.Pid1'.N45'.{H(Pid1'.N01'.N12'.N24'.N45'.B2.B4.Am1')}_inv(PkB4)}_Kb4pg'.{Kb4pg'}_PkPG) 
           /\ not(in({B2.Cn2'.Otp2'.N01'.N12'.N24'.Am1'.or.Am2'.B4.{H(B2.Cn2'.Otp2'.N01'.N12'.N24'.Am1'.or.Am2'.B4)}_inv(PkB2)}_PkPG.Pid1'.N45'.{H(Pid1'.N01'.N12'.N24'.N45'.B2.B4.Am1')}_inv(PkB4), PRList4))  
@@ -311,7 +306,7 @@ played_by PG def=
           /\ Snd({a.B2.B4.N01'.N12'.N24'.Pid1'.{H(a.B2.B4.N01'.N12'.N24'.Pid1'.Am1')}_inv(PkPG).a.N01'.N12'.N24'.Pid1'.{H(a.N01'.N12'.N24'.Pid1')}_inv(PkPG)}_Kb4pg')
  	  /\ witness(PG,B2,b2_pg_pe24a,a.B2.B4.N01'.N12'.N24'.Pid1'.H(a.B2.B4.N01'.N12'.N24'.Pid1'.Am1').H(a.N01'.N12'.N24'.Pid1'))
 
-%--R1.2: PG recept PE24=a,PM1,OI1 de la B2 si trimite PE12=a la B2 si B1
+%--R1.2: PG receives PE24=a,PM1,OI1 from B2 and sends PE12=a to B2 and B1
  6.  State = 5 
  	   /\ Rcv({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).a.N01.N12.N24.Pid1.{H(a.N01.N12.N24.Pid1)}_inv(PkPG).{B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2.{H(B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2)}_inv(PkB1)}_PkPG.B1.B2.Pid1.or.Pid2'.N01.N12.Am1.or.Am2.{H(B1.B2.Pid1.or.Pid2'.N01.N12.Am1.or.Am2)}_inv(PkB1)}_Kb2pg'.{Kb2pg'}_PkPG)
         =|> 
@@ -321,9 +316,10 @@ played_by PG def=
  	  /\ Snd({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).a.N01.N12.Pid1.{H(a.N01.N12.Pid1)}_inv(PkPG)}_Kb1pg'.{Kb1pg'}_PkB1)
           /\ witness(PG,B2,b2_pg_pe12a,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1).H(a.N01.N12.Pid1))
  	  /\ witness(PG,B1,b1_pg_pe12a,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1).H(a.N01.N12.Pid1))
+	  /\ request(PG,B2,pg_b2_ar12,Pid1.N01.N12.B1.B2.Am1)
 
-%--Res1 din spate din ATP de la B1:
-% PG in State 2 dupa ce a gen PE24=y, PE12=y, recept evenim "Res1" de la intrus in Intruder simulation ce reprezinta ca PG a rec In R1 de la B1 in ATP: PE01=a,PE12=y si atunci PG trimite APE12 la B1,B2
+%--Res1 backwards from ATP from B1:
+% PG in State 2 dupa ce a gen PE24=y, PE12=y, receives evenim "Res1" from intrus in Intruder simulation ce reprezinta ca PG a receives In R1 from B1 in ATP: PE01=a,PE12=y and atunci PG sends APE12 to B1,B2
  7.  State = 2 /\ Rcv(res1) 
         =|> 
           State' :=7 
@@ -333,22 +329,22 @@ played_by PG def=
           /\ witness(PG,B2,b2_pg_ape12,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1.y.B1.B2.N01.N12.Pid1.H(y.B1.B2.N01.N12.Pid1.Am1).H(y.N01.N12.Pid1)).H(a.N01.N12.Pid1.H(y.N01.N12.Pid1)))
           /\ witness(PG,B1,b1_pg_ape12,a.B1.B2.N01.N12.Pid1.H(a.B1.B2.N01.N12.Pid1.Am1.y.B1.B2.N01.N12.Pid1.H(y.B1.B2.N01.N12.Pid1.Am1).H(y.N01.N12.Pid1)).H(a.N01.N12.Pid1.H(y.N01.N12.Pid1)))
 
-%--Res1 din spate din ATP de la B2: %PG rec APE12 si PE24 =y  de la B2 si trm APE24 la B2, B4
+%--Res1 backwards from ATP from B2: %PG receives APE12 and PE24 =y  from B2 and sends APE24 to B2, B4
  8.  State = 7 /\ Rcv({a.B1.B2.N01.N12.Pid1.{H(a.B1.B2.N01.N12.Pid1.Am1.y.B1.B2.N01.N12.Pid1.{H(y.B1.B2.N01.N12.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.Pid1.{H(y.N01.N12.Pid1)}_inv(PkPG))}_inv(PkPG).y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).y.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG)}_Kb2pg)
           =|> 
           State' :=8
-	  /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb2pg) %trm APE24 la B2
- 	  /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb4pg) %trm APE24 la B4
+	  /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb2pg) %sends APE24 to B2
+ 	  /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.{H(y.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N12.N24.Pid1.{H(y.N01.N12.N24.Pid1)}_inv(PkPG))}_inv(PkPG)}_Kb4pg) %sends APE24 to B4
 	  /\ witness(PG,B2,b2_pg_ape24,a.B2.B4.N01.N12.N24.Pid1.H(a.B2.B4.N01.N12.N24.Pid1.Am1.y.B2.B4.N01.N12.N24.Pid1.H(y.B2.B4.N01.N12.N24.Pid1.Am1).H(y.N01.N12.N24.Pid1)).H(a.N01.N12.N24.Pid1.H(y.N01.N12.N24.Pid1))) 
 
-%--R2.1: PG receptioneaza cererea in R2 de la B2 ce contine PM2, OI2 si trimite PE24=a (pe care a generat-o in tranzitia 5, starea 5, si am witness(PG,B4...)deci nu mai trebuie pus aici) la B2,B4 
+%--R2.1: PG receives the request in R2 from B2 that contains PM2, OI2 and sends PE24=a  to B2,B4 
  9.  State = 5 /\ Rcv({{B2.Cn2.Otp2.N01.N12.N24.Am1.or.Am2.B4.{H(B2.Cn2.Otp2.N01.N12.N24.Am1.or.Am2.B4)}_inv(PkB2)}_PkPG.B2.B4.Pid1.or.Pid2'.N01.N12.N24.Am1.or.Am2.{H(B2.B4.Pid1.or.Pid2'.N01.N12.N24.Am1.or.Am2)}_inv(PkB2)}_Kb2pg'.{Kb2pg'}_PkPG)
          =|> 
         State':= 9
           /\ Snd({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).a.N01.N12.N24.Pid1.{H(a.N01.N12.N24.Pid1)}_inv(PkPG)}_Kb2pg')
- %trimite PE24=a la B2 (PE24=a este recept de B4)
 
-%--R2.1:  PG rec de la B2 PE24=a,PM1,OI1 si trimite PE12=a la B2 si B1                
+
+%--R2.1:  PG receives from B2 PE24=a,PM1,OI1 and sends PE12=a to B2 and B1                
  10.  State = 9 /\ Rcv({a.B2.B4.N01.N12.N24.Pid1.{H(a.B2.B4.N01.N12.N24.Pid1.Am1)}_inv(PkPG).a.N01.N12.N24.Pid1.{H(a.N01.N12.N24.Pid1)}_inv(PkPG).
 {B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2.{H(B1.Cn1'.Otp1'.N01.N12.Am1.or.Am2.B2)}_inv(PkB1)}_PkPG
 .B1.B2.Pid1.or.Pid2.N01.N12.Am1.or.Am2.{H(B1.B2.Pid1.or.Pid2.N01.N12.Am1.or.Am2)}_inv(PkB1)}_Kb2pg) 
@@ -359,10 +355,9 @@ played_by PG def=
           /\ Snd({a.B1.B2.N01.N12.Pid1.or.Pid2.{H(a.B1.B2.N01.N12.Pid1.or.Pid2.Am1.or.Am2)}_inv(PkPG).a.N01.N12.Pid1.or.Pid2.{H(a.N01.N12.Pid1.or.Pid2)}_inv(PkPG)}_Kb1pg'.{Kb1pg'}_PkPG)
 	  /\ witness(PG,B1,b1_pg_pe12a_pid1_pid2,a.B1.B2.N01.N12.Pid1.or.Pid2.H(a.B1.B2.N01.N12.Pid1.or.Pid2.Am1.or.Am2).H(a.N01.N12.Pid1.or.Pid2))
 	  /\ witness(PG,B2,b2_pg_pe12a_pid1_pid2,a.B1.B2.N01.N12.Pid1.or.Pid2.H(a.B1.B2.N01.N12.Pid1.or.Pid2.Am1.or.Am2).H(a.N01.N12.Pid1.or.Pid2))
+ 	  /\ request(PG,B2,pg_b2_ar12,Pid1.N01.N12.B1.B2.Am1)
 end role
 
-
-%%%%ctp(b1,b2,b4,pg,cn1,otp1,pid1,pid2,cn2,otp2,n01,am1,am2,pkb1,pkb2,pkb4,pkpg,h,OIList1,PList,CIList,PRList1,PRList2,PRList3,Snd,Rcv)
 role ctp(B1,B2,B4,PG: agent,           
               Cn1,Otp1,Pid1,Pid2,Cn2,Otp2,N01: text,      
               Am1, Am2: nat,	
@@ -396,26 +391,24 @@ role environment() def=
              Snd, Rcv: channel(dy)
 
   const b1, b2, b4, pg, i: agent,
-              cn1,otp1,cn2,otp2,cni,otpi, pid1,pid2, bg,or,and,en,y,a,t,res1: text,
+              cn1,otp1,cn2,otp2,cni,otpi, pid1,pid2, bg,or,and,en,y,a,timeout,res1: text,
 	      n01,n12,n24: text,	
               am1,am2: nat,	
               pkb1,pkb2,pkb4,pkpg,pki: public_key,  
               h: hash_func,	
-              scn1, scn2, b2_b1_oi1, b4_b2_oi2, pg_b1_pi1, pg_b2_pi2, b2_pg_pe24,b2_pg_ape24,b2_pg_pe24a,b2_pg_pe12, b2_pg_pe12a, b2_pg_ape12, b2_pg_pe12a_pid1_pid2,b1_pg_pe12, b1_pg_pe12a, b1_pg_ape12, b1_pg_pe12a_pid1_pid2: protocol_id, 
+              scn1, scn2, b2_b1_oi1, b4_b2_oi2, pg_b1_pi1, pg_b2_pi2,pg_b2_pr12, pg_b2_ar12, b2_pg_pe24,b2_pg_ape24,b2_pg_pe24a,b2_pg_pe12, b2_pg_pe12a, b2_pg_ape12, b2_pg_pe12a_pid1_pid2,b1_pg_pe12, b1_pg_pe12a, b1_pg_ape12, b1_pg_pe12a_pid1_pid2: protocol_id, 
 	      certB2: text             
-             
-%scn1, scn12, scn13, b1_c_oi0, b2_b1_oi1, b3_b1_oi2,pg_c_pi0,pg_b1_pi1, pg_b1_pi2, b1_pg_pe12, b1_pg_ape12, b1_pg_pe13, b1_pg_ape13,b1_pg_pe13a, b1_pg_pe01,b1_pg_pe01a, c_pg_pe01, c_pg_pe01a: protocol_id, 
 
   init  
           CIList :={b1.cn1.otp1, b2.cn2.otp2, i.cni.otpi}
-	  % CIList :={b2.cn2.otp2, i.cni.otpi} %numai ptr cazul R1.1
-	  % CIList :={b1.cn1.otp1, i.cni.otpi} %numai ptr cazul R1.2
+	  % CIList :={b2.cn2.otp2, i.cni.otpi} % for R1.1 simulation
+	  % CIList :={b1.cn1.otp1, i.cni.otpi} % for R1.2 simulation
           /\ OIList1 := {}
 	  /\ OIList2 := {}
           /\ PRList2 := {}
           /\ PRList4 := {}
 
-  intruder_knowledge = {b1, b2, b4, pg, cni, otpi, pkb1, pkb2,pkb4, pkpg, pki, inv(pki), pid1, pid2, am1, am2, t,res1}
+  intruder_knowledge = {b1, b2, b4, pg, cni, otpi, pkb1, pkb2,pkb4, pkpg, pki, inv(pki), pid1, pid2, am1, am2, timeout,res1}
 
   composition
   ctp(b1,b2,b4,pg,cn1,otp1,pid1,pid2,cn2,otp2,n01,am1,am2,pkb1,pkb2,pkb4,pkpg,h,OIList1,OIList2,CIList,PRList2,PRList4,Snd,Rcv)
@@ -429,28 +422,30 @@ end role
 % Description of goal properties:
 goal
 
-   secrecy_of scn1       %% ok
-   secrecy_of scn2      %% ok
+   secrecy_of scn1      
+   secrecy_of scn2      
 
-   authentication_on b2_b1_oi1   %% ok, b2 aut b1 pe OI1 
-   authentication_on b4_b2_oi2   %% ok, B4 aut B2 pe OI2 
+   authentication_on b2_b1_oi1   %%B2 authenticates B1 on OI1 
+   authentication_on b4_b2_oi2   %%B4 aut B2 on OI2 
 
-   authentication_on pg_b1_pi1   %% ok,PG aut B1 pe PI1, in s12 
-   authentication_on pg_b2_pi2   %% ok,pg aut B2 pe PI2, in s24
+   authentication_on pg_b1_pi1   %%PG aut B1 on PI1
+   authentication_on pg_b2_pi2   %%pg aut B2 on PI2
 
-   authentication_on b2_pg_pe24  %% ok, B2 aut PG pe pe24=y
-   authentication_on b2_pg_ape24  %% ok, B2 aut PG pe ape24
-   authentication_on b2_pg_pe24a  %% ok, B2 aut PG pe pe24=a
-   authentication_on b2_pg_pe12   %% ok, B2 aut PG pe pe12=y
-   authentication_on b2_pg_pe12a  %% ok, B2 aut PG pe pe12=a
-   authentication_on b2_pg_pe12a_pid1_pid2  %% ok, B2 aut PG pe pe12=a ptr cumpararea pid1 or pid2
-   authentication_on b2_pg_ape12  %% ok, B2 aut PG pe ape12
-   authentication_on b1_pg_pe12   %% ok, B1 aut PG pe pe12=y
-                                    %% authentication_on b1_pg_e24 Nu treb ca nu se poate aut de B1, 
-                                    %% fiind gen ptr B2...e implicit 
-   authentication_on b1_pg_pe12a   %% ok, B1 aut PG pe pe12=a
-   authentication_on b1_pg_pe12a_pid1_pid2  %% ok, B1 aut PG pe pe12=a ptr cumpararea pid1 or pid2
-   authentication_on b1_pg_ape12   %% ok, b1 aut pg pe ape12, in cazul Res1
+   authentication_on pg_b2_pr12   %% PG aut B2 on PR12
+   authentication_on pg_b2_ar12   %% PG aut B2 on Abort Request12
+
+   authentication_on b2_pg_pe24   %%B2 aut PG on PE24=y
+   authentication_on b2_pg_ape24  %%B2 aut PG on APE24
+   authentication_on b2_pg_pe24a  %%B2 aut PG on PE24=a
+   authentication_on b2_pg_pe12   %%B2 aut PG on PE12=y
+   authentication_on b2_pg_pe12a  %%B2 aut PG on PE12=a
+   authentication_on b2_pg_pe12a_pid1_pid2  %%B2 aut PG on PE12=a 
+   authentication_on b2_pg_ape12  %%B2 aut PG on APE12
+   authentication_on b1_pg_pe12   %%B1 aut PG on PE12=y
+                                     
+   authentication_on b1_pg_pe12a   %%B1 aut PG on PE12=a
+   authentication_on b1_pg_pe12a_pid1_pid2  %%B1 aut PG on PE12=a 
+   authentication_on b1_pg_ape12   %%B1 aut PG on APE12
 
 
 end goal

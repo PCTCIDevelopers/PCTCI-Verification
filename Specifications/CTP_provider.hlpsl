@@ -1,0 +1,257 @@
+%% CTP: B3 - provider 
+
+role broker1 (B1, B3,PG: agent,             
+            Cn1, Otp1, Pid3, N01: text,	
+            Am3: nat,	
+            PkB1, PkB3, PkPG: public_key,  
+            H: hash_func,	
+            Snd, Rcv: channel(dy))
+played_by B1 def=
+
+  local State:nat, 
+        N13:text,
+        Kb1b3, Kb1pg: symmetric_key  
+        
+  init State := 0
+
+  transition
+
+% B1 sends PO13 to the provider B3 
+ 1.  State = 0 /\ Rcv(start)
+          =|> 
+          State' :=1 
+	  /\ N13' :=new() 
+          /\ Kb1b3' :=new() 
+          /\ Snd({{B1.Cn1.Otp1.N01.N13'.Am3.B3.{H(B1.Cn1.Otp1.N01.N13'.Am3.B3)}_inv(PkB1)}_PkPG.B1.B3.Pid3.N01.N13'.Am3.{H(B1.B3.Pid3.N01.N13'.Am3)}_inv(PkB1)}_Kb1b3'.{Kb1b3'}_PkB3)
+          /\ secret(Cn1,scn1,{B1,PG})
+          /\ witness(B1,PG,pg_b1_pi1,B1.Cn1.Otp1.N01.N13'.Am3.B3)
+          /\ witness(B1,B3,b3_b1_oi1,B1.B3.Pid3.N01.N13'.Am3)
+
+% B1 receives PE13=y and CertB3 from B3 
+ 2.  State = 1 
+          /\ Rcv({y.B1.B3.N01.N13.Pid3.{H(y.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).y.N01.N13.Pid3.{H(y.N01.N13.Pid3)}_inv(PkPG).certB3}_Kb1b3)
+          =|> 
+          State' :=2         
+          /\ request(B1,PG,b1_pg_pe13,y.B1.B3.N01.N13.Pid3.H(y.B1.B3.N01.N13.Pid3.Am3).H(y.N01.N13.Pid3))
+
+% B1 receives PE13=a from B3
+ 3.  State = 1 
+          /\ Rcv({a.B1.B3.N01.N13.Pid3.{H(a.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).a.N01.N13.Pid3.{H(a.N01.N13.Pid3)}_inv(PkPG)}_Kb1b3)
+          =|> 
+          State' :=3         
+          /\ request(B1,PG,b1_pg_pe13a,a.B1.B3.N01.N13.Pid3.H(a.B1.B3.N01.N13.Pid3.Am3).H(a.N01.N13.Pid3))
+
+%--Res1: B1 receives APE13 from PG in Res1 backwards from ATP 
+ 4.  State = 2 /\ Rcv({a.B1.B3.N01.N13.Pid3.{H(a.B1.B3.N01.N13.Pid3.Am3.y.B1.B3.N01.N13.Pid3.{H(y.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).{H(y.N01.N13.Pid3)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N13.Pid3.{H(y.N01.N13.Pid3)}_inv(PkPG))}_inv(PkPG)}_Kb1pg'.{Kb1pg'}_PkPG) 
+         =|> 
+         State':= 5
+         /\ request(B1,PG,b1_pg_ape13,a.B1.B3.N01.N13.Pid3.H(a.B1.B3.N01.N13.Pid3.Am3.y.B1.B3.N01.N13.Pid3.H(y.B1.B3.N01.N13.Pid3.Am3).H(y.N01.N13.Pid3)).H(a.N01.N13.Pid3.H(y.N01.N13.Pid3)))
+
+%--R2.1: B1 (in state 1) receives timeout from intruder to simulate that PE13=a sent by B3 doesn't get to B1 and sends to PG PM1.OI1 to receive PE13 aborted 
+ 5.  State = 1 /\ Rcv(timeout)
+         =|> 
+        State':= 4
+	 /\ Kb1pg' :=new()
+         /\ Snd({{B1.Cn1.Otp1.N01.N13.Am3.B3.{H(B1.Cn1.Otp1.N01.N13.Am3.B3)}_inv(PkB1)}_PkPG.B1.B3.Pid3.N01.N13.Am3.{H(B1.B3.Pid3.N01.N13.Am3)}_inv(PkB1)}_Kb1pg'.{Kb1pg'}_PkPG)
+
+%--R2.1: B1 receives PE13=a from PG in R2 
+ 6.  State = 4 /\ Rcv({a.B1.B3.N01.N13.Pid3.{H(a.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).a.N01.N13.Pid3.{H(a.N01.N13.Pid3)}_inv(PkPG)}_Kb1pg')
+         =|> 
+        State':= 5
+	/\ request(B1,PG,b1_pg_pe13a,a.B1.B3.N01.N13.Pid3.H(a.B1.B3.N01.N13.Pid3.Am3).H(a.N01.N13.Pid3))
+
+end role
+
+role broker3 (B1, B3, PG: agent, 	            
+            PkB1, PkB3, PkPG: public_key, 
+	    OIList1: (agent.agent.text.text.text.nat.{hash(agent.agent.text.text.text.nat)}_inv(public_key)) set,
+	    PList: (text.nat) set,
+            H: hash_func,	
+            Snd, Rcv: channel(dy))
+played_by B3 def=
+
+  local State: nat,  
+          Am3: nat, 	 
+          N01, N13, Pid3: text, 	
+          Kb1b3, Kb3pg: symmetric_key,
+          Y: {agent.text.text.text.text.nat.agent.{hash(agent.text.text.text.text.nat.agent)}_inv(public_key)}_public_key
+
+  init State := 0
+
+  transition
+
+% B3 receives PO12 from B1 and sends PR13 (that includes Pid3) to PG  
+ 1.  State = 0 /\ Rcv({Y'.B1.B3.Pid3'.N01'.N13'.Am3'.{H(B1.B3.Pid3'.N01'.N13'.Am3')}_inv(PkB1)}_Kb1b3'.{Kb1b3'}_PkB3) 
+	  /\ not(in(B1.B3.Pid3'.N01'.N13'.Am3'.{H(B1.B3.Pid3'.N01'.N13'.Am3')}_inv(PkB1), OIList1)) 
+          /\ in(Pid3'.Am3' , PList) % test if B3 is provider
+          =|> 
+          State' :=1 
+	  /\ OIList1' :=cons(B1.B3.Pid3'.N01'.N13'.Am3'.{H(B1.B3.Pid3'.N01'.N13'.Am3')}_inv(PkB1) , OIList1)		
+          /\ Kb3pg' :=new()
+          /\ Snd({Y'.Pid3'.{H(Pid3'.N01'.N13'.B1.B3.Am3')}_inv(PkB3)}_Kb3pg'.{Kb3pg'}_PkPG)
+          /\ request(B3,B1,b3_b1_oi1,B1.B3.Pid3'.N01'.N13'.Am3')
+          /\ witness(B3,PG,pg_b3_pr13,Pid3'.N01'.N13'.B1.B3.Am3')
+
+% B3 receives PE13=y from PG and sends it together with certB3 to B1              
+ 2.  State = 1 /\ Rcv({y.B1.B3.N01.N13.Pid3.{H(y.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).y.N01.N13.Pid3.{H(y.N01.N13.Pid3)}_inv(PkPG)}_Kb3pg)
+          =|> 
+          State':= 2
+          /\ Snd({y.B1.B3.N01.N13.Pid3.{H(y.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).y.N01.N13.Pid3.{H(y.N01.N13.Pid3)}_inv(PkPG).certB3}_Kb1b3)
+          /\ request(B3,PG,b3_pg_pe13,y.B1.B3.N01.N13.Pid3.H(y.B1.B3.N01.N13.Pid3.Am3).H(y.N01.N13.Pid3))
+
+% B3 receives PE13=a from PG and sends it to B1              
+ 3.  State = 1 /\ Rcv({a.B1.B3.N01.N13.Pid3.{H(a.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).a.N01.N13.Pid3.{H(a.N01.N13.Pid3)}_inv(PkPG)}_Kb3pg)
+          =|> 
+          State':= 3
+          /\ Snd({a.B1.B3.N01.N13.Pid3.{H(a.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).a.N01.N13.Pid3.{H(a.N01.N13.Pid3)}_inv(PkPG)}_Kb1b3)
+          /\ request(B3,PG,b3_pg_pe13a,a.B1.B3.N01.N13.Pid3.H(a.B1.B3.N01.N13.Pid3.Am3).H(a.N01.N13.Pid3))
+   
+%--Res1: B3 receives APE13 from PG in Res1 that backward arrives from ATP after PE13=y 
+ 4.  State = 2 /\ Rcv({a.B1.B3.N01.N13.Pid3.{H(a.B1.B3.N01.N13.Pid3.Am3.y.B1.B3.N01.N13.Pid3.{H(y.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).{H(y.N01.N13.Pid3)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N13.Pid3.{H(y.N01.N13.Pid3)}_inv(PkPG))}_inv(PkPG)}_Kb3pg) 
+         =|> 
+        State':= 5
+	/\ request(B3,PG,b3_pg_ape13,a.B1.B3.N01.N13.Pid3.H(a.B1.B3.N01.N13.Pid3.Am3.y.B1.B3.N01.N13.Pid3.H(y.B1.B3.N01.N13.Pid3.Am3).H(y.N01.N13.Pid3)).H(a.N01.N13.Pid3.H(y.N01.N13.Pid3)))
+
+end role
+
+role paymentgateway (B1, B3, PG: agent,             
+            PkB1, PkB3, PkPG: public_key,  
+            CIList: (agent.text.text) set,
+            PRList3: ({agent.text.text.text.text.nat.agent.{hash(agent.text.text.text.text.nat.agent)}_inv(public_key)}_(public_key).text.{hash(text.text.text.agent.agent.nat)}_inv(public_key)) set,
+            H: hash_func,	
+            Snd, Rcv: channel(dy))
+played_by PG def=
+
+  local State: nat,
+          Cn1, Otp1: text,	
+          Am3, Am2: nat,	
+          N01, N13, Pid3: text,
+          Kb1pg, Kb3pg: symmetric_key
+	
+  init State := 0
+
+  transition
+
+% PG receives PR13 from B3 and sends PE13=y to B3 
+ 1.  State = 0 
+          /\ Rcv({{B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3.{H(B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3)}_inv(PkB1)}_PkPG.Pid3'.{H(Pid3'.N01'.N13'.B1.B3.Am3')}_inv(PkB3)}_Kb3pg'.{Kb3pg'}_PkPG) 
+          /\ not(in({B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3.{H(B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3)}_inv(PkB1)}_PkPG.Pid3'.{H(Pid3'.N01'.N13'.B1.B3.Am3')}_inv(PkB3), PRList3))  
+          /\ in(B1.Cn1'.Otp1' , CIList)  
+        =|> 
+          State' :=1 
+          /\ PRList3' :=cons({B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3.{H(B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3)}_inv(PkB1)}_PkPG.Pid3'.{H(Pid3'.N01'.N13'.B1.B3.Am3')}_inv(PkB3) , PRList3)
+          /\ Snd({y.B1.B3.N01'.N13'.Pid3'.{H(y.B1.B3.N01'.N13'.Pid3'.Am3')}_inv(PkPG).y.N01'.N13'.Pid3'.{H(y.N01'.N13'.Pid3')}_inv(PkPG)}_Kb3pg')
+          /\ request(PG,B1,pg_b1_pi1,B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3)
+          /\ witness(PG,B3,b3_pg_pe13,y.B1.B3.N01'.N13'.Pid3'.H(y.B1.B3.N01'.N13'.Pid3'.Am3').H(y.N01'.N13'.Pid3'))
+ 	  /\ witness(PG,B1,b1_pg_pe13,y.B1.B3.N01'.N13'.Pid3'.H(y.B1.B3.N01'.N13'.Pid3'.Am3').H(y.N01'.N13'.Pid3'))
+          /\ request(PG,B3,pg_b3_pr13,Pid3'.N01'.N13'.B1.B3.Am3')
+
+% PG receives PR13 from B3 and sends PE13=a to B3
+ 2.  State = 0 
+          /\ Rcv({{B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3.{H(B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3)}_inv(PkB1)}_PkPG.Pid3'.{H(Pid3'.N01'.N13'.B1.B3.Am3')}_inv(PkB3)}_Kb3pg'.{Kb3pg'}_PkPG) 
+          /\ not(in({B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3.{H(B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3)}_inv(PkB1)}_PkPG.Pid3'.{H(Pid3'.N01'.N13'.B1.B3.Am3')}_inv(PkB3), PRList3))  
+          /\ not(in(B1.Cn1'.Otp1' , CIList))
+          =|> 
+          State' :=2 
+          /\ PRList3' :=cons({B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3.{H(B1.Cn1'.Otp1'.N01'.N13'.Am3'.B3)}_inv(PkB1)}_PkPG.Pid3'.{H(Pid3'.N01'.N13'.B1.B3.Am3')}_inv(PkB3) , PRList3)
+          /\ Snd({a.B1.B3.N01'.N13'.Pid3'.{H(a.B1.B3.N01'.N13'.Pid3'.Am3')}_inv(PkPG).a.N01'.N13'.Pid3'.{H(a.N01'.N13'.Pid3')}_inv(PkPG)}_Kb3pg')
+          /\ witness(PG,B3,b3_pg_pe13a,a.B1.B3.N01'.N13'.Pid3'.H(a.B1.B3.N01'.N13'.Pid3'.Am3').H(a.N01'.N13'.Pid3'))
+ 	  /\ witness(PG,B1,b1_pg_pe13a,a.B1.B3.N01'.N13'.Pid3'.H(a.B1.B3.N01'.N13'.Pid3'.Am3').H(a.N01'.N13'.Pid3'))
+          /\ request(PG,B3,pg_b3_pr13,Pid3'.N01'.N13'.B1.B3.Am3')
+
+%--Res1 from backwards from ATP from B1:
+% PG in State 1 receives "Res1" from intruder in SPAN Intruder simulation representing that PG received PE01=a,PE13=y in R1 from B1 in ATP, and then PG sends APE13 to B1,B3
+ 3.  State = 1 /\ Rcv(res1) 
+        =|> 
+          State' :=3 
+	  /\ Kb1pg' :=new()
+	  /\ Snd({a.B1.B3.N01.N13.Pid3.{H(a.B1.B3.N01.N13.Pid3.Am3.y.B1.B3.N01.N13.Pid3.{H(y.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).{H(y.N01.N13.Pid3)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N13.Pid3.{H(y.N01.N13.Pid3)}_inv(PkPG))}_inv(PkPG)}_Kb1pg'.{Kb1pg'}_PkPG) 
+          /\ Snd({a.B1.B3.N01.N13.Pid3.{H(a.B1.B3.N01.N13.Pid3.Am3.y.B1.B3.N01.N13.Pid3.{H(y.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).{H(y.N01.N13.Pid3)}_inv(PkPG))}_inv(PkPG).{H(a.N01.N13.Pid3.{H(y.N01.N13.Pid3)}_inv(PkPG))}_inv(PkPG)}_Kb3pg)
+          /\ witness(PG,B3,b3_pg_ape13,a.B1.B3.N01.N13.Pid3.H(a.B1.B3.N01.N13.Pid3.Am3.y.B1.B3.N01.N13.Pid3.H(y.B1.B3.N01.N13.Pid3.Am3).H(y.N01.N13.Pid3)).H(a.N01.N13.Pid3.H(y.N01.N13.Pid3)))
+          /\ witness(PG,B1,b1_pg_ape13,a.B1.B3.N01.N13.Pid3.H(a.B1.B3.N01.N13.Pid3.Am3.y.B1.B3.N01.N13.Pid3.H(y.B1.B3.N01.N13.Pid3.Am3).H(y.N01.N13.Pid3)).H(a.N01.N13.Pid3.H(y.N01.N13.Pid3)))
+
+% --R2.1: PG receives the request in R2 from B1 that contains PM1, OI1 and sends PE13=a to B1,B3
+ 4.  State = 2 /\ Rcv({{B1.Cn1.Otp1.N01.N13.Am3.B3.{H(B1.Cn1.Otp1.N01.N13.Am3.B3)}_inv(PkB1)}_PkPG.B1.B3.Pid3.N01.N13.Am3.{H(B1.B3.Pid3.N01.N13.Am3)}_inv(PkB1)}_Kb1pg'.{Kb1pg'}_PkPG)
+          =|> 
+          State':= 4
+          /\ Snd({a.B1.B3.N01.N13.Pid3.{H(a.B1.B3.N01.N13.Pid3.Am3)}_inv(PkPG).a.N01.N13.Pid3.{H(a.N01.N13.Pid3)}_inv(PkPG)}_Kb1pg') %sends PE13=a to B1
+ end role
+
+
+role ctp(B1,B3,PG: agent,           
+              Cn1,Otp1,Pid3,N01: text,      
+              Am3: nat,	
+              PkB1, PkB3, PkPG: public_key,  
+              H: hash_func,	 
+	      OIList1: (agent.agent.text.text.text.nat.{hash(agent.agent.text.text.text.nat)}_inv(public_key)) set,
+	      PList: (text.nat) set, 
+              CIList: (agent.text.text) set,
+              PRList3: ({agent.text.text.text.text.nat.agent.{hash(agent.text.text.text.text.nat.agent)}_inv(public_key)}_(public_key).text.{hash(text.text.text.agent.agent.nat)}_inv(public_key)) set,
+              Snd, Rcv: channel(dy))
+def=
+
+
+  composition
+
+       broker1 (B1,B3,PG,Cn1,Otp1,Pid3,N01,Am3,PkB1,PkB3,PkPG,H,Snd,Rcv)
+       /\ broker3 (B1,B3,PG,PkB1,PkB3,PkPG,OIList1,PList,H,Snd,Rcv)
+       /\ paymentgateway (B1,B3,PG,PkB1,PkB3,PkPG,CIList,PRList3,H,Snd,Rcv)
+end role
+
+
+role environment() def=
+
+  local      OIList1: (agent.agent.text.text.text.nat.{hash(agent.agent.text.text.text.nat)}_inv(public_key)) set,
+	     PList: (text.nat) set,
+	     CIList: (agent.text.text) set,
+             PRList3: ({agent.text.text.text.text.nat.agent.{hash(agent.text.text.text.text.nat.agent)}_inv(public_key)}_(public_key).text.{hash(text.text.text.agent.agent.nat)}_inv(public_key)) set, 
+             Snd, Rcv: channel(dy)
+
+  const b1, b3 ,pg, i: agent,
+              cn1,otp1,cni,otpi, pid3, y,a,timeout,res1: text,
+	      n01,n13: text,	
+              am3: nat,	
+              pkb1,pkb3,pkpg,pki: public_key,  
+              h: hash_func,	
+              scn1, b3_b1_oi1, pg_b1_pi1, pg_b3_pr13, b3_pg_pe13, b3_pg_pe13a, b3_pg_ape13, b1_pg_pe13, b1_pg_pe13a, b1_pg_ape13: protocol_id, 
+	      certB3: text             
+
+  init  
+          CIList :={b1.cn1.otp1, i.cni.otpi}
+	  % CIList :={i.cni.otpi} % for R1 simulation
+	  /\ PList :={pid3.am3}
+          /\ OIList1 := {}
+          /\ PRList3 := {}
+         
+  intruder_knowledge = {b1, b3, pg, cni, otpi, pkb1, pkb3, pkpg, pki, inv(pki), pid3, am3, timeout,res1}
+
+  composition
+  ctp(b1,b3,pg,cn1,otp1,pid3,n01,am3,pkb1,pkb3,pkpg,h,OIList1,PList,CIList,PRList3,Snd,Rcv)
+%/\ ctp(i,b3,pg,cni,otpi,pid3,n01,am3,pki,pkb3,pkpg,h,OIList1,PList,CIList,PRList3,Snd,Rcv)
+%/\ ctp(b1,i,pg,cn1,otp1,pid3,n01,am3,pkb1,pki,pkpg,h,OIList1,PList,CIList,PRList3,Snd,Rcv)
+    
+end role
+
+% Description of goal properties:
+goal
+
+   secrecy_of scn1       
+ 			
+   authentication_on b3_b1_oi1   %% B2 authenticates B1 on OI1 
+ 
+   authentication_on pg_b1_pi1   %% PG aut B1 on PI1, in s12 
+
+   authentication_on pg_b3_pr13   %% PG aut B3 on PR13
+
+
+   authentication_on b3_pg_pe13   %% B3 aut PG on PE13=y
+   authentication_on b3_pg_pe13a  %% B3 aut PG on PE13=a
+   authentication_on b3_pg_ape13  %% B3 aut PG on APE13
+   authentication_on b1_pg_pe13   %% B1 aut PG on PE13=y
+   authentication_on b1_pg_pe13a   %% B1 aut PG on PE13=y
+   authentication_on b1_pg_ape13  %% B1 aut PG on APE13
+
+end goal
+
+% Call of the main role:
+environment()
